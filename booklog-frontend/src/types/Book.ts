@@ -6,7 +6,8 @@ export type Book = {
   title: string;
   author?: string;
   imageUrl?: string;
-  status: string;
+  status: number;
+  statusLabel: string;
   memos: Memo[];
   userId: number;
   createdAt: string;

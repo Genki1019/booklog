@@ -2,7 +2,6 @@ import * as fs from "fs";
 import path from "path";
 import { prisma } from "../prisma/client.js";
 import { messages } from "../utils/messages.js";
-import { getStatusLabel } from "../utils/status.js";
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 // 書籍登録API
 export const createBook = async (req, res) => {
@@ -59,7 +58,7 @@ export const createBook = async (req, res) => {
             title: book.title,
             author: book.author,
             imageUrl: book.imageUrl,
-            status: getStatusLabel(book.status),
+            status: book.status,
             memos: book.memos,
             userId: book.userId,
             createdAt: book.createdAt,
@@ -92,7 +91,7 @@ export const getBooks = async (req, res) => {
             title: book.title,
             author: book.author,
             imageUrl: book.imageUrl,
-            status: getStatusLabel(book.status),
+            status: book.status,
             memos: book.memos,
             userId: book.userId,
             createdAt: book.createdAt,
@@ -121,7 +120,7 @@ export const getBook = async (req, res) => {
             title: book.title,
             author: book.author,
             imageUrl: book.imageUrl,
-            status: getStatusLabel(book.status),
+            status: book.status,
             memos: book.memos,
             userId: book.userId,
             createdAt: book.createdAt,
@@ -202,7 +201,7 @@ export const updateBook = async (req, res) => {
             title: updatedBook.title,
             author: updatedBook.author,
             imageUrl: updatedBook.imageUrl,
-            status: getStatusLabel(updatedBook.status),
+            status: updatedBook.status,
             memos: updatedBook.memos,
             userId: updatedBook.userId,
             createdAt: updatedBook.createdAt,

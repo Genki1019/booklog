@@ -13,9 +13,9 @@ export const fetchBooks = async (): Promise<Book[]> => {
   }
 };
 
-export const updateBookStatus = async (bookId: number, status: string): Promise<Book> => {
+export const updateBookStatus = async (bookId: number, status: number): Promise<Book> => {
   const formData = new FormData();
-  formData.append("status", status);
+  formData.append("status", String(status));
   try {
     const res = await axios.put(`${BASE_URL}/books/${bookId}`, formData);
     return res.data;

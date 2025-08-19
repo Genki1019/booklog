@@ -1,5 +1,6 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
+import { updateBookStatus } from "../api/bookApi";
 import { createMemo, updateMemo } from "../api/memoApi";
 import type { Book } from "../types/Book";
 import type { Memo } from "../types/Memo";
@@ -9,10 +10,20 @@ type Props = {
   onClose: () => void;
   onUpdateMemo: (bookId: number, updatedMemo: Memo) => void;
 }
+
 export const DetailModal = ({book, onClose, onUpdateMemo}: Props) => {
   const [memoText, setMemoText] = useState(book.memos[0]?.content || "");
   const [memoId, setMemoId] = useState<number | null>(book.memos[0]?.id || null);
   const [editing, setEditing] = useState(false);
+  const [status, setStatus] = useState(book.status);
+
+  const STATUS_LABEL = {
+    1: "未読",
+    2: "読書中",
+    3: "読了"
+  };
+
+  const statusLabel = STATUS_LABEL[status as 1 | 2 | 3] ?? "未設定";
 
   const saveMemo = async () => {
     if (!memoText.trim()) return;
@@ -34,6 +45,17 @@ export const DetailModal = ({book, onClose, onUpdateMemo}: Props) => {
     }
   };
 
+  // ステータス切り替え処理
+  const toggleStatus = async () => {
+    try {
+      const nextStatus = status % 3 + 1;
+      const updatedBook = await updateBookStatus(book.id, nextStatus);
+      setStatus(updatedBook.status);
+    } catch (err) {
+      console.error("ステータス更新エラー:", err);
+    }
+  };
+
   return (
     <Dialog open={true} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black bg-opacity-30" />
@@ -51,8 +73,11 @@ export const DetailModal = ({book, onClose, onUpdateMemo}: Props) => {
             </div>
 
             {/* 右上：ステータス */}
-            <div className="text-sm font-semibold text-white bg-gray-500 px-2 py-1 rounded">
-              {book.status}
+            <div
+              onClick={toggleStatus}
+              className="text-sm font-semibold text-white bg-gray-500 px-2 py-1 rounded cursor-pointer select-none"
+            >
+              {statusLabel}
             </div>
           </div>
 
