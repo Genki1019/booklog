@@ -17,7 +17,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use('/uploads', express.static(path.join(UPLOAD_DIR, '../../uploads')));
+app.use('/uploads', express.static(path.join(UPLOAD_DIR, '../uploads')));
 app.use('/api/books', bookRouter);
 
 const PORT = process.env.PORT || 3000;

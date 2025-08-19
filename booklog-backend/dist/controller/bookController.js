@@ -3,6 +3,7 @@ import path from "path";
 import { prisma } from "../prisma/client.js";
 import { messages } from "../utils/messages.js";
 import { getStatusLabel } from "../utils/status.js";
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 // 書籍登録API
 export const createBook = async (req, res) => {
     try {
@@ -35,7 +36,7 @@ export const createBook = async (req, res) => {
         else {
             // 画像アップロードがあればパスを設定
             if (req.file) {
-                imageUrl = `/uploads/${req.file.filename}`;
+                imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
             }
             else {
                 imageUrl = "https://placehold.jp/cccccc/ffffff/128x192.png?text=No%20Image";
@@ -167,7 +168,7 @@ export const updateBook = async (req, res) => {
                 if (manualAuthor?.trim())
                     dataToUpdate.author = manualAuthor.trim();
                 if (req.file)
-                    newImageUrl = `/uploads/${req.file.filename}`;
+                    newImageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
             }
         }
         else {
@@ -186,7 +187,7 @@ export const updateBook = async (req, res) => {
             include: { memos: true },
         });
         // 更新完了後に古い画像を削除（ローカルのupload/にある場合のみ）
-        if (existingBook.imageUrl && existingBook.imageUrl.startsWith("/uploads/") && existingBook.imageUrl !== updatedBook.imageUrl) {
+        if (existingBook.imageUrl && existingBook.imageUrl.startsWith(`${BASE_URL}/uploads/`) && existingBook.imageUrl !== updatedBook.imageUrl) {
             const oldImagePath = path.join(process.cwd(), existingBook.imageUrl);
             fs.unlink(oldImagePath, (err) => {
                 if (err)
@@ -225,7 +226,8 @@ export const deleteBook = async (req, res) => {
         }
         // 画像ファイルが存在すれば削除
         if (existingBook.imageUrl) {
-            const filePath = path.join(process.cwd(), existingBook.imageUrl);
+            const fileName = path.basename(existingBook.imageUrl);
+            const filePath = path.join(process.cwd(), "uploads", fileName);
             fs.unlink(filePath, (err) => {
                 if (err) {
                     console.warn(messages.errors.imageDeleteError(filePath));
