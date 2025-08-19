@@ -1,22 +1,26 @@
-const BASE_URL = 'http://localhost:3000/api';
+import axios from "axios";
+import type { Book } from "../types/Book";
 
-export const fetchBooks = async () => {
-  const res = await fetch(`${BASE_URL}/books`);
-  if (!res.ok) throw new Error('Failed to fetch books');
-  return res.json();
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+export const fetchBooks = async (): Promise<Book[]> => {
+  try {
+    const res = await axios.get(`${BASE_URL}/books`);
+    return res.data;
+  } catch (error) {
+    console.error("書籍取得エラー: ", error);
+    throw error;
+  }
 };
 
-export const createBook = async (book: {
-  isbn: string;
-  title?: string;
-  author?: string;
-  status?: 'unread' | 'reading' | 'read';
-}) => {
-  const res = await fetch(`${BASE_URL}/books`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(book),
-  });
-  if (!res.ok) throw new Error('Failed to create book');
-  return res.json();
+export const updateBookStatus = async (bookId: number, status: string): Promise<Book> => {
+  const formData = new FormData();
+  formData.append("status", status);
+  try {
+    const res = await axios.put(`${BASE_URL}/books/${bookId}`, formData);
+    return res.data;
+  } catch (error) {
+    console.error("書籍ステータス更新エラー: ", error);
+    throw error;
+  }
 };
