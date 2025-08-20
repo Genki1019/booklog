@@ -6,10 +6,12 @@ import Footer from "../components/common/Footer";
 import Header from "../components/common/Header";
 import DetailModal from "../components/DetailModal";
 import type { Book } from "../types/Book";
+import { BookCreateModal } from "../components/BookCreateModal";
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book>();
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   
   useEffect(() => {
     fetchBooks()
@@ -28,12 +30,19 @@ export default function Home() {
       <div className="text-center mt-4">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
-          onClick={() => alert("新規登録機能は未実装です")}
+          onClick={() => setShowRegisterModal(true)}
         >
           新規登録
         </button>
       </div>
 
+      {showRegisterModal && (
+        <BookCreateModal
+          userId={1}
+          onClose={() => setShowRegisterModal(false)}
+          onCreate={(newBook) => setBooks(prev => [newBook, ...prev])}
+        />
+      )}
       {/* 検索エリア */}
       <SearchForm onSearch={handleSearch} />
 

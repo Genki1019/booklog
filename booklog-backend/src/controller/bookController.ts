@@ -39,6 +39,19 @@ export const createBook = async (req: Request, res: Response) => {
       author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "著者不明";
       imageUrl = volumeInfo.imageLinks?.thumbnail || "https://placehold.jp/cccccc/ffffff/128x192.png?text=No%20Image";
     } else {
+        // タイトル必須チェック
+        if (!manualTitle || manualTitle.trim() === "") {
+          return res.status(400).json({ error: messages.errors.titleRequired });
+        }
+
+        // 著者必須チェック
+        if (!manualAuthor || manualAuthor.trim() === "") {
+          return res.status(400).json({ error: messages.errors.authorRequired });
+        }
+
+        title = manualTitle.trim();
+        author = manualAuthor.trim();
+
       // 画像アップロードがあればパスを設定
       if (req.file) {
         imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
@@ -90,6 +103,7 @@ export const getBooks = async (req: Request, res: Response) => {
     const books = await prisma.book.findMany({
       where: whereClause,
       include: { memos: true },
+      orderBy: { updatedAt: "desc" },
     });
 
     const booksWithLabel = books.map((book) => ({
