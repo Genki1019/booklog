@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchBooks } from "../api/bookApi";
-import { DetailModal } from "../components/DetailModal";
+import SearchForm from "../components/ SearchForm";
+import DetailModal from "../components/DetailModal";
 import type { Book } from "../types/Book";
 
 export default function Home() {
@@ -12,12 +13,30 @@ export default function Home() {
       .then(data => setBooks(data));
   }, []);
 
+  const handleSearch = async (params: {title?: string, author?: string, status?: string}) => {
+    const data = await fetchBooks(params);
+    setBooks(data);
+  };
+
   return (
     <div className="bg-[#FBF3E4] min-h-screen p-4">
       <h1 className="text-3xl font-bold text-white bg-[url('/images/wood-shelf.png')] bg-cover px-6 py-3 shadow-md text-center">
         書籍管理アプリ
       </h1>
+      {/* 新規登録ボタン */}
+      <div className="text-center mt-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
+          onClick={() => alert("新規登録機能は未実装です")}
+        >
+          新規登録
+        </button>
+      </div>
 
+      {/* 検索エリア */}
+      <SearchForm onSearch={handleSearch} />
+
+      {/* 書籍一覧 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-6
                       auto-rows-[220px] sm:auto-rows-[260px] md:auto-rows-[280px] lg:auto-rows-[300px]">
         {books.map(book => (
@@ -34,7 +53,8 @@ export default function Home() {
             </div>
 
             {/* 棚板：木目調 */}
-            <div className="font-semibold text-white w-full h-8 bg-[url('/images/wood-shelf.png')] bg-cover shadow-[0_8px_12px_rgba(0,0,0,0.25)] relative flex items-center justify-center z-0 cursor-pointer"
+            <div className="font-semibold text-white w-full h-8 bg-[url('/images/wood-shelf.png')] bg-cover
+                            shadow-[0_8px_12px_rgba(0,0,0,0.25)] relative flex items-center justify-center z-0 cursor-pointer"
                 onClick={() => setSelectedBook(book)}
               >
                 <span className="truncate w-full text-center px-2">{book.title}</span>
@@ -43,6 +63,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* 詳細モーダル */}
       {selectedBook && (
         <DetailModal
           book={selectedBook}

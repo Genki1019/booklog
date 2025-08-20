@@ -11,7 +11,7 @@ type Props = {
   onUpdateMemo: (bookId: number, updatedMemo: Memo) => void;
 }
 
-export const DetailModal = ({book, onClose, onUpdateMemo}: Props) => {
+export default function DetailModal ({book, onClose, onUpdateMemo}: Props) {
   const [memoText, setMemoText] = useState(book.memos[0]?.content || "");
   const [memoId, setMemoId] = useState<number | null>(book.memos[0]?.id || null);
   const [editing, setEditing] = useState(false);

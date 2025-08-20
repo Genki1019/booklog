@@ -3,9 +3,15 @@ import type { Book } from "../types/Book";
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-export const fetchBooks = async (): Promise<Book[]> => {
+type FetchBooksParams = {
+  title?: string;
+  author?: string;
+  status?: string;
+};
+
+export const fetchBooks = async (params: FetchBooksParams = {}): Promise<Book[]> => {
   try {
-    const res = await axios.get(`${BASE_URL}/books`);
+    const res = await axios.get(`${BASE_URL}/books`, { params});
     return res.data;
   } catch (error) {
     console.error("書籍取得エラー: ", error);
