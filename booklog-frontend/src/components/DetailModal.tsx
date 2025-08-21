@@ -1,6 +1,6 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
-import { updateBookStatus } from "../api/bookApi";
+import { deleteBook, updateBookStatus } from "../api/bookApi";
 import { createMemo, updateMemo } from "../api/memoApi";
 import type { Book } from "../types/Book";
 import type { Memo } from "../types/Memo";
@@ -9,13 +9,15 @@ type Props = {
   book: Book;
   onClose: () => void;
   onUpdateMemo: (bookId: number, updatedMemo: Memo) => void;
+  onDelete: (bookId: number) => void;
 }
 
-export default function DetailModal ({book, onClose, onUpdateMemo}: Props) {
+export default function DetailModal ({book, onClose, onUpdateMemo, onDelete}: Props) {
   const [memoText, setMemoText] = useState(book.memos[0]?.content || "");
   const [memoId, setMemoId] = useState<number | null>(book.memos[0]?.id || null);
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState(book.status);
+  const [loading, setLoading] = useState(false);
 
   const STATUS_LABEL = {
     1: "未読",
@@ -53,6 +55,20 @@ export default function DetailModal ({book, onClose, onUpdateMemo}: Props) {
       setStatus(updatedBook.status);
     } catch (err) {
       console.error("ステータス更新エラー:", err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("本当に削除しますか？")) return;
+    setLoading(true);
+    try {
+      await deleteBook(book.id);
+      onDelete(book.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      alert(err.message || "削除に失敗しました");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,6 +125,13 @@ export default function DetailModal ({book, onClose, onUpdateMemo}: Props) {
                 保存
               </button>
             )}
+            <button
+              onClick={handleDelete}
+              disabled={loading}
+              className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+              削除
+            </button>
             <button
               onClick={onClose}
               className="bg-gray-300 px-4 py-2 rounded"

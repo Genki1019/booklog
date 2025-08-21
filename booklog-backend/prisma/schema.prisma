@@ -34,7 +34,7 @@ model Book {
 
 model Memo {
   id        Int      @id @default(autoincrement())
-  book      Book     @relation(fields: [bookId], references: [id])
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   bookId    Int
   content   String   @db.Text
   createdAt DateTime @default(now())

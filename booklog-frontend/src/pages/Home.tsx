@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { fetchBooks } from "../api/bookApi";
 import SearchForm from "../components/ SearchForm";
+import { BookCreateModal } from "../components/BookCreateModal";
 import BookShelf from "../components/BookShelf";
 import Footer from "../components/common/Footer";
 import Header from "../components/common/Header";
 import DetailModal from "../components/DetailModal";
 import type { Book } from "../types/Book";
-import { BookCreateModal } from "../components/BookCreateModal";
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -65,6 +65,10 @@ export default function Home() {
             setSelectedBook(prev =>
               prev && prev.id === bookId ? { ...prev, memos: [updatedMemo] } : prev
             );
+          }}
+          onDelete={(deletedId) => {
+            setBooks(prev => prev.filter(b => b.id !== deletedId));
+            setSelectedBook(undefined);
           }}
         />
       )}

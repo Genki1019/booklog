@@ -67,3 +67,14 @@ export const createBook = async (params: CreateBookParams): Promise<Book> => {
   }
 };
 
+export const deleteBook = async (bookId: number): Promise<void> => {
+  try {
+    await axios.delete(`${BASE_URL}/books/${bookId}`);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw error;
+  }
+};

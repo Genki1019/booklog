@@ -249,13 +249,15 @@ export const deleteBook = async (req: Request, res: Response) => {
     if (existingBook.imageUrl) {
       const fileName = path.basename(existingBook.imageUrl);
       const filePath = path.join(process.cwd(), "uploads", fileName);
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.warn(messages.errors.imageDeleteError(filePath));
-        } else {
-          console.log(messages.success.imageDeleted(filePath));
-        }
-      });
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.warn(messages.errors.imageDeleteError(filePath));
+          } else {
+            console.log(messages.success.imageDeleted(filePath));
+          }
+        });
+      }
     }
     
     await prisma.book.delete({ where: { id: bookId } });
