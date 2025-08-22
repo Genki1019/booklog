@@ -198,25 +198,31 @@ export const updateBook = async (req: Request, res: Response) => {
         
         const volumeInfo = data.items[0].volumeInfo;
 
-        dataToUpdate.isbn = isbn;
+        dataToUpdate.isbn = isbn
 
         if (volumeInfo.title) dataToUpdate.title = volumeInfo.title;
         if (volumeInfo.authors) dataToUpdate.author = volumeInfo.authors.join(", ");
         if (volumeInfo.imageLinks?.thumbnail) newImageUrl = volumeInfo.imageLinks.thumbnail;
     } else {
-        // タイトル必須チェック
-        if (!manualTitle || manualTitle.trim() === "") {
-          return res.status(400).json({ error: messages.errors.titleRequired });
+        if (manualTitle !== undefined) {
+          // タイトル必須チェック
+          if (manualTitle.trim() === "") {
+            return res.status(400).json({ error: messages.errors.titleRequired });
+          }
+          dataToUpdate.title = manualTitle.trim();
         }
 
         // 著者必須チェック
-        if (!manualAuthor || manualAuthor.trim() === "") {
-          return res.status(400).json({ error: messages.errors.authorRequired });
+        if (manualAuthor !== undefined) {
+          if (manualAuthor.trim() === "") {
+            return res.status(400).json({ error: messages.errors.authorRequired });
+          }
+          dataToUpdate.author = manualAuthor.trim();
         }
 
-        dataToUpdate.title = manualTitle.trim();
-        dataToUpdate.author = manualAuthor.trim();
-        if (req.file) newImageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
+        if (req.file) {
+          newImageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
+        }
       }
     }
 

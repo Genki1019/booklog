@@ -56,6 +56,7 @@ export default function DetailModal({ book, onClose, onUpdateMemo, onDelete, onU
       const nextStatus = status % 3 + 1;
       const updatedBook = await updateBookStatus(book.id, nextStatus);
       setStatus(updatedBook.status);
+      onUpdateBook(updatedBook);
     } catch (err) {
       console.error("ステータス更新エラー:", err);
     }

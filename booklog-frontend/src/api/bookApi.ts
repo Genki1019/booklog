@@ -20,10 +20,8 @@ export const fetchBooks = async (params: FetchBooksParams = {}): Promise<Book[]>
 };
 
 export const updateBookStatus = async (bookId: number, status: number): Promise<Book> => {
-  const formData = new FormData();
-  formData.append("status", String(status));
   try {
-    const res = await axios.put(`${BASE_URL}/books/${bookId}`, formData);
+    const res = await axios.put(`${BASE_URL}/books/${bookId}`, { status });
     return res.data;
   } catch (error) {
     console.error("書籍ステータス更新エラー: ", error);
