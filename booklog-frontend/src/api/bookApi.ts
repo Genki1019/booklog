@@ -67,6 +67,43 @@ export const createBook = async (params: CreateBookParams): Promise<Book> => {
   }
 };
 
+type UpdateBookParams = {
+  isbn?: string;
+  title?: string;
+  author?: string;
+  image?: File | null;
+  status?: number;
+  userId: number;
+};
+
+export const updateBook = async (
+  bookId: number,
+  params: UpdateBookParams
+): Promise<Book> => {
+  const formData = new FormData();
+
+  if (params.isbn !== undefined) formData.append("isbn", params.isbn);
+  if (params.title !== undefined) formData.append("title", params.title);
+  if (params.author !== undefined) formData.append("author", params.author);
+  if (params.image) formData.append("image", params.image);
+  if (params.status !== undefined) formData.append("status", String(params.status));
+
+  formData.append("userId", String(params.userId));
+
+  try {
+    const res = await axios.put(`${BASE_URL}/books/${bookId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.response?.data?.error) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
 export const deleteBook = async (bookId: number): Promise<void> => {
   try {
     await axios.delete(`${BASE_URL}/books/${bookId}`);

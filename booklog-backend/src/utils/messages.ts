@@ -1,5 +1,3 @@
-import { title } from "process";
-
 export const messages = {
   errors: {
     isbnRequired: "ISBNは必須です。",

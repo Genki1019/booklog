@@ -147,7 +147,7 @@ export const getBook = async (req, res) => {
 export const updateBook = async (req, res) => {
     try {
         const { id } = req.params;
-        const { isbn, title: manualTitle, author: manualAuthor, status } = req.body;
+        const { isbn, title: manualTitle, author: manualAuthor, status, userId } = req.body;
         const bookId = Number(id);
         const existingBook = await prisma.book.findUnique({ where: { id: bookId } });
         if (!existingBook) {
@@ -156,35 +156,51 @@ export const updateBook = async (req, res) => {
         // 更新用データを動的に作成
         let newImageUrl = existingBook.imageUrl;
         const dataToUpdate = { status: status ? Number(status) : existingBook.status };
-        if (!existingBook.isbn) {
-            // 手動登録書籍は更新可能
-            if (isbn) {
-                // Google Books APIで情報取得
-                const googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
-                const data = await googleRes.json();
-                if (data.items && data.items.length > 0) {
-                    const volumeInfo = data.items[0].volumeInfo;
-                    if (volumeInfo.title)
-                        dataToUpdate.title = volumeInfo.title;
-                    if (volumeInfo.authors)
-                        dataToUpdate.author = volumeInfo.authors.join(", ");
-                    if (volumeInfo.imageLinks?.thumbnail)
-                        newImageUrl = volumeInfo.imageLinks.thumbnail;
-                }
-            }
-            else {
-                if (manualTitle?.trim())
-                    dataToUpdate.title = manualTitle.trim();
-                if (manualAuthor?.trim())
-                    dataToUpdate.author = manualAuthor.trim();
-                if (req.file)
-                    newImageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
-            }
-        }
-        else {
+        if (existingBook.isbn) {
             // ISBN登録書籍はタイトル・著者・画像更新不可
             if (manualTitle || manualAuthor || req.file) {
                 console.log("ISBN登録書籍のタイトル・著者・画像更新は無視されました");
+            }
+        }
+        else {
+            if (isbn !== undefined && isbn !== null) {
+                // ISBN必須チェック
+                if (isbn.trim() === "") {
+                    return res.status(400).json({ error: messages.errors.isbnRequired });
+                }
+                // ISBN重複チェック（ユーザーごと）
+                const existingBook = await prisma.book.findFirst({ where: { userId: Number(userId), isbn } });
+                if (existingBook) {
+                    return res.status(400).json({ error: messages.errors.bookAlreadyExists });
+                }
+                // Google Books APIで情報取得
+                const googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+                const data = await googleRes.json();
+                if (!data.items || data.items.length === 0) {
+                    return res.status(404).json({ error: messages.errors.bookNotFound });
+                }
+                const volumeInfo = data.items[0].volumeInfo;
+                dataToUpdate.isbn = isbn;
+                if (volumeInfo.title)
+                    dataToUpdate.title = volumeInfo.title;
+                if (volumeInfo.authors)
+                    dataToUpdate.author = volumeInfo.authors.join(", ");
+                if (volumeInfo.imageLinks?.thumbnail)
+                    newImageUrl = volumeInfo.imageLinks.thumbnail;
+            }
+            else {
+                // タイトル必須チェック
+                if (!manualTitle || manualTitle.trim() === "") {
+                    return res.status(400).json({ error: messages.errors.titleRequired });
+                }
+                // 著者必須チェック
+                if (!manualAuthor || manualAuthor.trim() === "") {
+                    return res.status(400).json({ error: messages.errors.authorRequired });
+                }
+                dataToUpdate.title = manualTitle.trim();
+                dataToUpdate.author = manualAuthor.trim();
+                if (req.file)
+                    newImageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
             }
         }
         // 画像URLが変更された場合のみ更新

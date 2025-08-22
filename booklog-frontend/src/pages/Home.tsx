@@ -70,6 +70,15 @@ export default function Home() {
             setBooks(prev => prev.filter(b => b.id !== deletedId));
             setSelectedBook(undefined);
           }}
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          onUpdateBook={async (_updatedBook) => {
+            const latestBooks = await fetchBooks();
+            setBooks(latestBooks);
+
+            // 選択中の本も更新
+            const updatedBook = latestBooks.find(b => b.id === selectedBook?.id);
+            setSelectedBook(updatedBook);
+          }}
         />
       )}
 
